@@ -1400,6 +1400,42 @@ function renderBrTable(){
 renderMain();
 renderPending();
 renderCompare();
+
+// ══════════════ URL PARAMETER ROUTING ══════════════
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const view   = params.get('view');
+  const brName = params.get('branch'); // optional: pre-select branch by name
+
+  if(view === 'branch'){
+    // Hide all tabs except สาขา
+    document.querySelectorAll('.tab').forEach(t => {
+      if(!t.textContent.includes('สาขา')) t.style.display='none';
+    });
+    // Hide header filter bar (period/segment buttons) — not relevant for branch view
+    const fg = document.querySelector('.fg');
+    if(fg) fg.style.display='none';
+
+    // Auto-open branch tab
+    const brTab = Array.from(document.querySelectorAll('.tab')).find(t=>t.textContent.includes('สาขา'));
+    if(brTab){
+      // Init branch tab (lazy load guard)
+      if(!brInited){ brInited=true; initBranchTab(); }
+      // Activate visually
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.getElementById('page-branch').classList.add('active');
+      brTab.classList.add('active');
+
+      // Pre-select branch if ?branch= provided
+      if(brName){
+        const sel = document.getElementById('branchSelect');
+        const idx = BD.branches.findIndex(b=>b.toLowerCase()===brName.toLowerCase());
+        if(idx >= 0){ sel.value = idx; renderBranch(); }
+      }
+    }
+  }
+})();
 </script>
 </body>
 </html>
